@@ -1,0 +1,525 @@
+---
+title: "R_RNA"
+output: html_document
+author: "Angela Ares"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    toc_depth: 5
+    toc_float: yes
+  pdf_document:
+    toc: yes
+    toc_depth: '5'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE, fig.path='figures/', fig.width=8, fig.height=5 )
+```
+by adding `fig.path = 'figures/'` we put all of the figures created when we knit this document into a directory called `figures`
+
+
+# Differential Expression Testing
+
+Read the docs: https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html
+
+Installs:
+```{r}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager") # calls the package from the source
+BiocManager::install("GSEAbase")
+BiocManager::install("clusterProfiler")
+install.packages("devtools")
+install.packages("RColorBrewer")
+install.packages("pheatmap")
+devtools::install_github("karthik/wesanderson")
+BiocManager::install("org.EcK12.eg.db")
+BiocManager::install("org.Sc.sgd.db")
+BiocManager::install("gage")
+BiocManager::install("GOstats")
+BiocManager::install("edgeR")
+install.packages("treemap")
+install.packages("tidyverse")
+install.packages("ggplot2")
+install.packages("AnnotationDbi")
+```
+
+
+Load Libraries: 
+```{r, warning = FALSE, message = FALSE}
+#library(tximport) Not available for version 3.6.0
+library(DESeq2)
+library(tidyverse)
+library("GSEABase")
+#library(clusterProfiler)
+library(RColorBrewer)
+library(pheatmap)
+library(wesanderson)
+library(GOstats)
+library(edgeR)
+library(treemap)
+library(tidyverse)
+library(ggplot2)
+library(AnnotationDbi)
+library(gage)
+library(ggraph)
+library(clusterProfiler)
+library(reshape2)
+library(stringr)
+```
+
+Load data, the reads for the different samples are in individual .txt files
+```{r}
+files <- list.files(path="~/Desktop/git MP/DESeq analysis/raw counts", pattern="*.txt", full.names=TRUE, recursive=FALSE)
+datalist <- lapply(files, function(x)read.table(x, header=T))
+datafr <- do.call("cbind", datalist) 
+#delete the extracolumns
+datafr <- datafr[, -c(2, 3, 5:7, 9:11, 13:15, 17:19, 21:23)]
+#change the colnames
+names(datafr)[1] <- "Gene"
+names(datafr)[2] <- "C1"
+names(datafr)[3] <- "C2"
+names(datafr)[4] <- "C3"
+names(datafr)[5] <- "Cd1"
+names(datafr)[6] <- "Cd2"
+names(datafr)[7] <- "Cd3"
+
+```
+
+Define metadata
+```{r}
+treatment <- c("C","C","C","Cd","Cd","Cd")
+strain <- c("MP","MP","MP","MP","MP","MP")
+sample<-c("C1","C2","C3","Cd1","Cd2","Cd3")
+gensmeta<- data.frame(strain, treatment, sample)
+rownames(gensmeta)<-c("C1","C2","C3","Cd1","Cd2","Cd3")
+```
+
+convert first column (refering name of genes) into rownames
+```{r}
+rownames(datafr) <- datafr[,1]
+```
+
+check type of variables and convert to integer
+```{r}
+datafr[,-1]<- lapply(lapply(datafr[,-1],round),as.integer) 
+str(datafr)
+datafrf<- datafr[, -1]
+```
+
+make sure the colnames and rownames are the same in both data.frames ("sbf" and "gensmeta")
+```{r}
+all(rownames(gensmeta)==colnames(datafrf))
+```
+
+
+Make DESeq object
+```{r}
+dds<- DESeqDataSetFromMatrix(countData = datafrf, 
+                             colData = gensmeta, 
+                             design = ~ treatment)
+dds$treatment<- relevel(dds$treatment, ref = "C")
+```
+
+Run DESeq2: 
+```{r, cache = TRUE}
+dds_df <- DESeq(dds)
+```
+
+DEG results
+```{r}
+res<- results(dds_df, alpha = 0.05)
+```
+
+Check out results: 
+```{r}
+cd_res<- results(dds_df, contrast = c("treatment", "Cd", "C"), alpha = 0.05)
+head(cd_res)
+```
+
+
+visualize the dispersion (ver primer script)
+```{r}
+plotDispEsts(dds_df)
+```
+
+Summarize results, up and down regulated genes are indicated
+```{r}
+summary(cd_res, alpha=0.05)
+summary(cd_res, alpha=0.01)
+```
+
+# Visualizing RNA-seq results 
+
+## Normalization
+
+**Count Data Transformations:** 
+for ranking and visualizations (e.g. PCA plots and heatmaps)
+
+**rlog**: "transforms the count data to the log2 scale in a way which minimizes differences between samples for rows with small counts, and which normalizes with respect to library size. The rlog transformation produces a similar variance stabilizing effect as varianceStabilizingTransformation, though rlog is more robust in the case when the size factors vary widely. The transformation is useful when checking for outliers or as input for machine learning techniques such as clustering or linear discriminant analysis." -- from function documentation 
+
+This is computationally very time intensive. 
+
+```{r, cache=TRUE}
+rld <- rlog(dds, blind=TRUE)
+head(assay(rld), 10)
+```
+
+** Variance stabilizing transformation (so much faster than rlog):**
+"This function calculates a variance stabilizing transformation (VST) from the fitted dispersion-mean relation(s) and then transforms the count data (normalized by division by the size factors or normalization factors), yielding a matrix of values which are now approximately homoskedastic (having constant variance along the range of mean values). The transformation also normalizes with respect to library size. The rlog is less sensitive to size factors, which can be an issue when size factors vary widely. These transformations are useful when checking for outliers or as input for machine learning techniques such as clustering or linear discriminant analysis."" – from function documentation
+
+```{r, cache = TRUE}
+vsd <- vst(dds, blind = TRUE)
+head(assay(vsd), 20)
+```
+
+## Ordination
+
+rlog PCA: 
+```{r pca_rld}
+data1 <- plotPCA(rld, intgroup = "treatment", returnData=TRUE)
+data1$group<-gsub(" : ","_",as.character(data1$group))
+percentVar1 <- round(100 * attr(data1, "percentVar"))
+
+PCA<-ggplot(data1, aes(PC1, PC2, color = treatment))+ theme_bw()+
+  geom_point(size=9, alpha = 0.8) + scale_colour_manual(values = c("#E5C616", "#42858C","#D33B44"))+
+  xlab(paste0("PC1: ",percentVar1[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar1[2],"% variance")) +
+  theme(text = element_text(size=20)) + ggtitle("vst PCA")
+
+#PCA<-ggplot(data1, aes(PC1, PC2, color = treatment))+ theme_bw()+
+  #geom_point(size=10, alpha = 0.8) + scale_colour_manual(values = c("#E5C616", "#42858C"))+
+  #xlab(paste0("PC1: ",percentVar1[1],"% variance")) +
+  #ylab(paste0("PC2: ",percentVar1[2],"% variance")) +
+  #theme(legend.position = "none")+
+  #theme(text = element_text(size=20)) + ggtitle("rlog PCA")
+PCA
+#ggsave("desktop/PCA.pdf", device="pdf", width = 9, height = 5) 
+ggsave("~/Desktop/git MP/rlogPCA.pdf", device="pdf", width = 7, height = 5) # to save the plot
+```
+
+variance stabilized PCA:
+```{r pca_vst}
+data1 <- plotPCA(vsd, intgroup = "treatment", returnData=TRUE)
+data1$group<-gsub(" : ","_",as.character(data1$group))
+percentVar1 <- round(100 * attr(data1, "percentVar"))
+
+PCA<-ggplot(data1, aes(PC1, PC2, color = treatment))+ theme_bw()+
+  geom_point(size=9, alpha = 0.8) + scale_colour_manual(values = c("#E5C616", "#42858C","#D33B44"))+
+  xlab(paste0("PC1: ",percentVar1[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar1[2],"% variance")) +
+  theme(text = element_text(size=20)) + ggtitle("vst PCA")
+PCA
+#ggsave("figures/vsd_PCA.png", device="png") # to save the plot
+```
+
+## HeatMaps
+
+rlog HeatMap
+```{r heatmap_rld}
+library(jcolors)
+df <- as.data.frame(colData(rld)[,c("treatment", "sample")])
+
+mat_colors1<-list(sample = jcolors("pal8")[0:7])
+names(mat_colors1$sample)<- df$sample
+
+mat_colors <- list(treatment = jcolors("pal7")[7:9])
+names(mat_colors$treatment) <- c("C", "Cd")
+
+genes <- order(res$padj)[1:200]
+
+phea<-pheatmap(assay(rld)[genes, ], cluster_rows=TRUE, show_rownames=FALSE,
+         cluster_cols=FALSE, annotation_col=df, annotation_colors = c(mat_colors1, mat_colors), fontsize = 12)
+
+
+phea
+
+```
+
+
+#variance stabilized HeatMap: 
+```{r heatmap_vst}
+#df <- as.data.frame(colData(vsd)[,c("treatment", "sample")])
+
+#pheatmap(assay(vsd)[genes, ], cluster_rows=TRUE, show_rownames=FALSE, show_colnames = FALSE,
+         #cluster_cols=FALSE, annotation_col=df, annotation_colors = c(mat_colors1, mat_colors), fontsize = 12)
+```
+
+Another option for heat maps: 
+plot the difference from the mean normalized count across samples 
+(and optionally change default colors)
+
+With Rlog transformed data:
+```{r heatmap_rld_meandiff}
+
+library(jcolors)
+genes <- order(res$padj)[1:200]
+
+mat <- assay(rld)[genes, ]
+mat <- mat - rowMeans(mat)
+
+df <- as.data.frame(colData(rld)[,c("treatment", "sample")])
+
+
+p<- pheatmap(mat,  cluster_rows=TRUE, cluster_cols=FALSE, show_rownames = FALSE, filename = "heatmap.pdf")
+p 
+```
+
+Same but with variance stabilizing function:
+```{r heatmap_vst_meandiff}
+
+#mat <- assay(vsd)[genes, ]
+#mat <- mat - rowMeans(mat)
+
+#df <- as.data.frame(colData(vsd)[,c("treatment", "sample")])
+
+#pheatmap(mat,  cluster_rows=TRUE, show_rownames=FALSE, show_colnames = FALSE,
+         #cluster_cols=FALSE, annotation_col=df, annotation_colors = c(mat_colors1, mat_colors), fontsize = 12)
+
+```
+
+
+Heatmap of sample-to-sample distances, it can be used instead PCA. 
+```{r heatmap_sampledistance}
+sampleDists <- dist(t(assay(vsd)))
+sampleDistMatrix <- as.matrix(sampleDists)
+rownames(sampleDistMatrix) <- paste(vsd$treatment, vsd$type, sep="-")
+colnames(sampleDistMatrix) <- NULL
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+phea<- pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+```
+get data frame of DESeq2 results:
+
+```{r}
+cd_table<- data.frame(cd_res) %>%
+  rownames_to_column(var = "ensgenes")
+```
+
+
+##Volcano plots colored by significance
+
+```{r}
+#add a column of NA
+cd_table$delabel <- NA
+cd_table$delabel[cd_table$diffexpressed != "NO"] <- cd_table$ensgenes[cd_table$diffexpressed != "NO"]
+
+ 
+# add a column of NAs
+cd_table$diffexpressed <- "NO"
+# if log2Foldchange > 1 and pvalue < 0.05, set as "UP" 
+cd_table$diffexpressed[cd_table$log2FoldChange >= 1 & cd_table$padj < 0.05] <- "GENEDE"
+# if log2Foldchange < -1 and pvalue < 0.05, set as "DOWN"
+cd_table$diffexpressed[cd_table$log2FoldChange <= -1 & cd_table$padj < 0.05] <- "GENEDE"
+
+#to know the name of the genes DE
+#ggplot(data=cd_table, aes(x=log2FoldChange, y=-log10(padj), col=diffexpressed, label=delabel)) + 
+    #geom_point() + 
+    #theme_minimal() +
+   #geom_text(size= 2)
+
+cdplot<-ggplot(cd_table, aes(x = log2FoldChange, y = -log10(padj), color = diffexpressed, alpha=0.5)) +
+  geom_point(size=3) + 
+  xlab("log2 fold change") +
+  ylab("-log10 adjusted p-value") + 
+  ylim (0,10) +
+  theme (panel.background = element_rect (fill = "white", color = "black", linetype= "solid"), 
+         text = element_text(size=16),
+         legend.position = "none",
+         plot.title = element_text(size = rel(1.1), hjust = 0.5),
+         axis.title = element_text(size = rel(1.1))) +
+        geom_vline(xintercept=c(-1, 1), col="grey", size=0.5) +
+        geom_hline(yintercept=-log10(0.05), col="grey", size=0.5)
+
+cdplot1 <- cdplot + scale_colour_manual(values = c ("#42858C", "#666666"))
+cdplot1
+ggsave("~/Desktop/git MP/volcanoMP.pdf", device="pdf", width = 8, height = 5)
+
+```
+Prepare list of ensgenes for Venn diagram 
+```{r}
+Cd_f<- filter(cd_table, (padj< 0.05 & log2FoldChange >= 1) | (padj< 0.05 & log2FoldChange <= -1))
+Cdnames<-dplyr::select (Cd_f, c(ensgenes))
+head(Cdnames)
+```
+
+
+# Gene Set Enrichment Testing 
+
+get data frame of DESeq2 results:
+
+```{r}
+cd_tableMP<- data.frame(cd_res) %>%
+  rownames_to_column(var = "ensgenes")
+```
+
+```{r}
+conversion<- read.table("~/Desktop/git MP/Genome resources/gene_correspondence_table_v51.txt", fill = TRUE, row.names=NULL, col.names = c("V1", "old_ID"))
+cd_table_conv<-cd_tableMP %>%
+    left_join(conversion, by=c("ensgenes"="V1"))
+
+#add the annotation
+annot<- read.csv("~/Desktop/git MP/Genome resources/MpTak_v6.1_func_annot_1line_excel.csv", sep= ";", header=FALSE)
+
+#add annotation table to the main one
+cd_full<- cd_tableMP %>%left_join(annot, by=c("ensgenes"="V1"))
+#change name of column V2
+names(cd_full)[names(cd_full) == "V2"] <- "annotation"
+```
+
+##GOstats
+Add GO terms
+```{r}
+GOlist<- read.csv("~/Desktop/git MP/Genome resources/MpTak1v5.1r1_GO_annotation.tsv", sep="", header = FALSE)
+
+#add the list to the main one
+cd_full_GO<- cd_full %>%left_join(GOlist, by=c("ensgenes"="V1"))
+names(cd_full_GO)[names(cd_full_GO) == "V2"] <- "GO"
+
+#table up and down (P=0.05) for enrichment analysis
+#DE Up and Down for padj 0.05 and log2FoldChange 1
+
+CdUpMP<- cd_full_GO[cd_full_GO$padj <= 0.05 & cd_full_GO$log2FoldChange >= 1, ]
+CdUpMP<-  CdUpMP[complete.cases(CdUpMP$ensgenes),]
+CdDownMP<- cd_full_GO[cd_annot$padj <= 0.05 & cd_full_GO$log2FoldChange <= -1, ]
+CdDownMP<- CdDownMP[complete.cases(CdDownMP$ensgenes), ]
+
+#now we just keep the GO list
+CdUpnamesMP<- CdUpMP[ ,1]
+CdUpnamesMP<-as.character(CdUpnamesMP)
+CdUpnamesMP<- na.omit(CdUpnamesMP)
+
+CdDownnamesMP<- CdDownMP[ ,1]
+CdDownnamesMP<-as.character(CdDownnamesMP)
+CdDownnamesMP<- na.omit(CdDownnamesMP)
+```
+
+Enrichment analysis: GO
+Preparation for the enrichment analysis. All the genes (Universe)
+```{r}
+cd_frame<- cd_full_GO %>%
+    add_column(evidence="ISS") %>%
+    select(ensgenes, GO, evidence)
+
+#reorder the columns and make sure all columns are characters
+cd_ordered_GO<- cd_frame_na[,c(2,3,1)]
+cd_ordered_GO$GO <- as.character(cd_ordered_GO$GO)
+
+#we build the universe now from cd_table
+
+universe_total<- cd_tableMP[ ,1]
+universe_total
+
+#get rid of duplicates
+universe<- unique(universe_total)
+
+lapply(CdUpnamesMP, function(x) x %in% universe)
+#each ensgenes ID needs to have per line 
+#cd_frame_short<-ave(seq_len(nrow(cd_frame)), cd_frame$ensgenes, FUN = seq_along)
+#frame_final<-cbind(cd_frame, cd_frame_short)
+#frame<- reshape(frame_final, idvar = c("ensgenes", "evidence"), timevar = "cd_frame_short", direction = "wide")
+```
+
+Now we have a full table with the general annotations in one column and the GO terms in another, from here we can prepare the files for GOstats analysis
+Now turn this into a GO frame for GOstats:
+```{r, warning = FALSE, message= FALSE}
+goFrame<- GOFrame(cd_ordered_GO)
+goAllFrame<- GOAllFrame(goFrame)
+gsc <- GeneSetCollection(goAllFrame, setType = GOCollection())
+```
+
+Now let's run the GOstats function
+
+```{r}
+params<- GSEAGOHyperGParams(name="MPCd", geneSetCollection= gsc, geneIds = CdDownnamesMP, universeGeneIds = universe, ontology = "BP", pvalueCutoff = 0.05, conditional = TRUE, testDirection = "over")
+
+#modify the function for each dataset (i.e. CdUp, CdDown)
+
+Over<- hyperGTest(params)
+
+Over
+
+CdDownBP<-summary(Over)
+
+
+#Add a column with the element info and ontoly type (BP or MF)
+CdUpMF$ontology<-"MF"
+CdUpMF$DE<-"Up"
+CdUpMF$elem<- "Cd"
+
+CdDownMF$ontology<-"MF"
+CdDownMF$DE<-"Down"
+CdDownMF$elem<- "Cd"
+
+CdUpBP$ontology<-"BP"
+CdUpBP$DE<-"Up"
+CdUpBP$elem<- "Cd"
+
+CdDownBP$ontology<-"BP"
+CdDownBP$DE<-"Down"
+CdDownBP$elem<- "Cd"
+
+#bind all the tables to have all the results together
+GOresBP<- rbind(CdUpBP, CdDownBP)
+GOresMF<- rbind(CdUpMF, CdDownMF)
+
+names(GOresBP)[names(GOresBP) == "GOBPID"] <- "GO_id"
+names(GOresMF)[names(GOresMF) == "GOMFID"] <- "GO_id"
+
+GOres<- rbind(GOresBP, GOresMF)
+
+write.csv(GOres, "~/Desktop/git MP/GOres.csv")
+```
+
+##KEGG enrichment analysis
+
+```{r}
+annotKEGG<- read.csv("~/Desktop/git MP/Genome resources/MpTak_v6.1_func_annotation.tsv", sep= "", header=FALSE)
+
+annotKEGG<- annotKEGG %>%
+  filter(V2=="KEGG") %>%
+  select(-c(V4:V10))
+
+#join to DEG list
+
+Kegg_join<-Cd_f%>%
+    left_join(annotKEGG, by=c("ensgenes"="V1"))%>%
+    rename(KeggID = V3)%>%
+    select(-2, -4:-6, -8:-10)
+
+#remove rows without Kegg ID
+Kegg_kegga<- na.omit(Kegg_join)
+kegga_prep<-Kegg_kegga%>%
+  select(-1,-2,-3)
+kegga_input<- as.vector(kegga_prep$KeggID)
+
+#species.KEGG="ko"
+MPpaths<- kegga(kegga_input, species.KEGG = "ko")
+MPpaths<- na.omit(MPpaths)
+MPpaths_sig<- MPpaths %>%
+  filter(P.DE<0.05)
+write.csv(MPpaths_sig, "~/Desktop/git MP/kegga_sig.csv")
+
+
+#For Pathview is neccessary to create a table with the KEGG names with raw data for each of the sample
+Kegg_test<-datakegg%>%
+    left_join(annotKEGG, by=c("ensgenes"="V1"))%>%
+    rename(KeggID = V3)%>%
+    select(-1, -8)
+Kegg_clean<- na.omit(Kegg_test)
+Kegg_clean<- Kegg_clean[,c(7,1,2,3,4,5,6)]
+write.csv(Kegg_clean, "~/Desktop/git MP/keggtrial.csv")
+
+```
+
+
+
+List of genes used for validation through qRT-PCR analysis
+```{r}
+list_validation<- c("Mapoly0003s0267", "Mapoly0031s0032", "Mapoly0117s0029", "Mapoly0137s0019", "Mapoly0008s0244", "Mapoly0002s0324", "Mapoly0009s0173", "Mapoly0097s0009", "Mapoly0070s0070", "Mapoly0076s0007", "Mapoly0073s0038", "Mapoly0180s0018", "Mapoly0036s0136", "Mapoly0015s0156", "Mapoly0097s0082")
+```
+

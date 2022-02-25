@@ -1,0 +1,68 @@
+"","Pathway","N","DE","P.DE"
+"path:ko00030","Pentose phosphate pathway",85,8,0.00213088029718153
+"path:ko00053","Ascorbate and aldarate metabolism",62,7,0.00139729097729434
+"path:ko00061","Fatty acid biosynthesis",39,4,0.0208023633047331
+"path:ko00071","Fatty acid degradation",58,5,0.0202927758649096
+"path:ko00073","Cutin, suberine and wax biosynthesis",14,5,2.34669884630429e-05
+"path:ko00130","Ubiquinone and other terpenoid-quinone biosynthesis",59,5,0.0216946298383699
+"path:ko00230","Purine metabolism",214,12,0.01405115773295
+"path:ko00240","Pyrimidine metabolism",110,7,0.030183802805922
+"path:ko00260","Glycine, serine and threonine metabolism",103,7,0.0220180704349826
+"path:ko00270","Cysteine and methionine metabolism",122,7,0.0485012589134624
+"path:ko00280","Valine, leucine and isoleucine degradation",70,5,0.0413345289434699
+"path:ko00290","Valine, leucine and isoleucine biosynthesis",19,3,0.0139234011500936
+"path:ko00380","Tryptophan metabolism",80,8,0.00144269959541512
+"path:ko00400","Phenylalanine, tyrosine and tryptophan biosynthesis",71,11,3.01775915302116e-06
+"path:ko00410","beta-Alanine metabolism",45,5,0.00719048009745896
+"path:ko00480","Glutathione metabolism",57,11,3.05508432920976e-07
+"path:ko00500","Starch and sucrose metabolism",106,8,0.00819177700085717
+"path:ko00520","Amino sugar and nucleotide sugar metabolism",156,9,0.0265285404162571
+"path:ko00561","Glycerolipid metabolism",90,7,0.0111585638518606
+"path:ko00564","Glycerophospholipid metabolism",115,11,0.000289453753800202
+"path:ko00592","alpha-Linolenic acid metabolism",26,5,0.000589538122721886
+"path:ko00630","Glyoxylate and dicarboxylate metabolism",101,9,0.00168384687612372
+"path:ko00710","Carbon fixation in photosynthetic organisms",36,6,0.00037550594530359
+"path:ko00770","Pantothenate and CoA biosynthesis",44,6,0.00113400785234469
+"path:ko00900","Terpenoid backbone biosynthesis",63,5,0.0279253796536257
+"path:ko00940","Phenylpropanoid biosynthesis",32,9,1.17104943534006e-07
+"path:ko00941","Flavonoid biosynthesis",27,5,0.000707586732080256
+"path:ko00945","Stilbenoid, diarylheptanoid and gingerol biosynthesis",12,2,0.0405331921348139
+"path:ko00950","Isoquinoline alkaloid biosynthesis",62,5,0.0262726053537873
+"path:ko00960","Tropane, piperidine and pyridine alkaloid biosynthesis",32,4,0.0105416260815175
+"path:ko00965","Betalain biosynthesis",7,2,0.014102692082288
+"path:ko00983","Drug metabolism - other enzymes",32,6,0.000191433419452979
+"path:ko01100","Metabolic pathways",4613,177,8.99257477592044e-09
+"path:ko01110","Biosynthesis of secondary metabolites",2084,103,2.42704656348258e-10
+"path:ko01200","Carbon metabolism",364,24,5.74776016949166e-05
+"path:ko01210","2-Oxocarboxylic acid metabolism",82,6,0.0239178600825212
+"path:ko01212","Fatty acid metabolism",84,6,0.0265573322006675
+"path:ko01230","Biosynthesis of amino acids",238,23,1.35721753835502e-07
+"path:ko01240","Biosynthesis of cofactors",375,28,1.28750436378191e-06
+"path:ko01524","Platinum drug resistance",46,6,0.00143784583917324
+"path:ko03008","Ribosome biogenesis in eukaryotes",82,6,0.0239178600825212
+"path:ko03040","Spliceosome",123,9,0.00632217496880736
+"path:ko03460","Fanconi anemia pathway",54,5,0.0152817459213527
+"path:ko04016","MAPK signaling pathway - plant",54,10,1.5856009845686e-06
+"path:ko04070","Phosphatidylinositol signaling system",55,5,0.0164470471947053
+"path:ko04075","Plant hormone signal transduction",45,5,0.00719048009745896
+"path:ko04110","Cell cycle",111,10,0.000869135234959543
+"path:ko04114","Oocyte meiosis",80,8,0.00144269959541512
+"path:ko04115","p53 signaling pathway",67,5,0.0351883074209294
+"path:ko04141","Protein processing in endoplasmic reticulum",144,15,8.5299259835867e-06
+"path:ko04146","Peroxisome",73,10,2.60433104073834e-05
+"path:ko04152","AMPK signaling pathway",84,6,0.0265573322006675
+"path:ko04212","Longevity regulating pathway - worm",57,7,0.000843298773097695
+"path:ko04361","Axon regeneration",59,5,0.0216946298383699
+"path:ko04612","Antigen processing and presentation",46,5,0.00789202086066454
+"path:ko04613","Neutrophil extracellular trap formation",90,6,0.0356112468705085
+"path:ko04626","Plant-pathogen interaction",86,12,3.34879650540376e-06
+"path:ko04712","Circadian rhythm - plant",27,3,0.0358575355882491
+"path:ko04914","Progesterone-mediated oocyte maturation",65,6,0.00825196587536116
+"path:ko04915","Estrogen signaling pathway",77,6,0.0181033307269244
+"path:ko04978","Mineral absorption",36,4,0.0158688360367642
+"path:ko05014","Amyotrophic lateral sclerosis",280,13,0.0424028180461196
+"path:ko05034","Alcoholism",86,9,0.000528820596918797
+"path:ko05225","Hepatocellular carcinoma",116,7,0.038633000150783
+"path:ko05231","Choline metabolism in cancer",61,5,0.0246837244891265
+"path:ko05322","Systemic lupus erythematosus",45,4,0.0332324636961155
+"path:ko05417","Lipid and atherosclerosis",159,9,0.0295088978321258
