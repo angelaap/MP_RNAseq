@@ -33,4 +33,13 @@ Alternatively we can create a .slurm file which include the code for FastQ runni
 
 `nano fastqc.slurm`
 
+
+## Trimming with Trimmomatic 0.36
+
+
+
+## Alignment with Burrows-Wheeler Alignment tool (BWA)
+
+
+
 ```
