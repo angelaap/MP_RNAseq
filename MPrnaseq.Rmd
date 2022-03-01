@@ -5,6 +5,7 @@ author: "Angela Ares"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   html_document:
+    keep_md: true
     number_sections: yes
     theme: cerulean
     toc: yes
@@ -29,7 +30,7 @@ Installs:
 ```{r}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager") # calls the package from the source
-BiocManager::install("GSEAbase")
+BiocManager::install("GSEABase")
 BiocManager::install("clusterProfiler")
 install.packages("devtools")
 install.packages("RColorBrewer")
@@ -44,16 +45,14 @@ install.packages("treemap")
 install.packages("tidyverse")
 install.packages("ggplot2")
 install.packages("AnnotationDbi")
+install.packages("GSEABase")
 ```
 
 
 Load Libraries: 
 ```{r, warning = FALSE, message = FALSE}
-#library(tximport) Not available for version 3.6.0
 library(DESeq2)
 library(tidyverse)
-library("GSEABase")
-#library(clusterProfiler)
 library(RColorBrewer)
 library(pheatmap)
 library(wesanderson)
@@ -68,11 +67,12 @@ library(ggraph)
 library(clusterProfiler)
 library(reshape2)
 library(stringr)
+library(GSEABase)
 ```
 
 Load data, the reads for the different samples are in individual .txt files
 ```{r}
-files <- list.files(path="~/Desktop/git MP/DESeq analysis/raw counts", pattern="*.txt", full.names=TRUE, recursive=FALSE)
+files <- list.files(path="~/Documents/Trabajo/git MP/DESeq analysis/raw counts/", pattern="*.txt", full.names=TRUE, recursive=FALSE)
 datalist <- lapply(files, function(x)read.table(x, header=T))
 datafr <- do.call("cbind", datalist) 
 #delete the extracolumns
@@ -137,12 +137,15 @@ Check out results:
 ```{r}
 cd_res<- results(dds_df, contrast = c("treatment", "Cd", "C"), alpha = 0.05)
 head(cd_res)
+
+write.csv(cd_res, "~/Documents/Trabajo/git MP/Mpolymorpha_Cd_RNAseq/cd_res.csv", row.names = FALSE)
 ```
 
 
 visualize the dispersion (ver primer script)
 ```{r}
 plotDispEsts(dds_df)
+
 ```
 
 Summarize results, up and down regulated genes are indicated
@@ -197,7 +200,7 @@ PCA<-ggplot(data1, aes(PC1, PC2, color = treatment))+ theme_bw()+
   #theme(text = element_text(size=20)) + ggtitle("rlog PCA")
 PCA
 #ggsave("desktop/PCA.pdf", device="pdf", width = 9, height = 5) 
-ggsave("~/Desktop/git MP/rlogPCA.pdf", device="pdf", width = 7, height = 5) # to save the plot
+ggsave("~/Documents/Trabajo/git MP/Mpolymorpha_Cd_RNAseq/rlogPCA.pdf", device="pdf", width = 7, height = 5) # to save the plot
 ```
 
 variance stabilized PCA:
@@ -212,7 +215,7 @@ PCA<-ggplot(data1, aes(PC1, PC2, color = treatment))+ theme_bw()+
   ylab(paste0("PC2: ",percentVar1[2],"% variance")) +
   theme(text = element_text(size=20)) + ggtitle("vst PCA")
 PCA
-#ggsave("figures/vsd_PCA.png", device="png") # to save the plot
+
 ```
 
 ## HeatMaps
@@ -337,16 +340,9 @@ cdplot<-ggplot(cd_table, aes(x = log2FoldChange, y = -log10(padj), color = diffe
 
 cdplot1 <- cdplot + scale_colour_manual(values = c ("#42858C", "#666666"))
 cdplot1
-ggsave("~/Desktop/git MP/volcanoMP.pdf", device="pdf", width = 8, height = 5)
+ggsave("~/Documents/Trabajo/git MP/Mpolymorpha_Cd_RNAseq/vulcano.pdf", device="pdf", width = 8, height = 5)
 
 ```
-Prepare list of ensgenes for Venn diagram 
-```{r}
-Cd_f<- filter(cd_table, (padj< 0.05 & log2FoldChange >= 1) | (padj< 0.05 & log2FoldChange <= -1))
-Cdnames<-dplyr::select (Cd_f, c(ensgenes))
-head(Cdnames)
-```
-
 
 # Gene Set Enrichment Testing 
 
@@ -358,12 +354,12 @@ cd_tableMP<- data.frame(cd_res) %>%
 ```
 
 ```{r}
-conversion<- read.table("~/Desktop/git MP/Genome resources/gene_correspondence_table_v51.txt", fill = TRUE, row.names=NULL, col.names = c("V1", "old_ID"))
+conversion<- read.table("~/Documents/Trabajo/git MP/Genome resources/gene_correspondence_table_v51.txt", fill = TRUE, row.names=NULL, col.names = c("V1", "old_ID"))
 cd_table_conv<-cd_tableMP %>%
     left_join(conversion, by=c("ensgenes"="V1"))
 
 #add the annotation
-annot<- read.csv("~/Desktop/git MP/Genome resources/MpTak_v6.1_func_annot_1line_excel.csv", sep= ";", header=FALSE)
+annot<- read.csv("~/Documents/Trabajo/git MP/Genome resources/MpTak_v6.1_func_annot_1line_excel.csv", sep= ";", header=FALSE)
 
 #add annotation table to the main one
 cd_full<- cd_tableMP %>%left_join(annot, by=c("ensgenes"="V1"))
@@ -374,7 +370,7 @@ names(cd_full)[names(cd_full) == "V2"] <- "annotation"
 ##GOstats
 Add GO terms
 ```{r}
-GOlist<- read.csv("~/Desktop/git MP/Genome resources/MpTak1v5.1r1_GO_annotation.tsv", sep="", header = FALSE)
+GOlist<- read.csv("~/Documents/Trabajo/git MP/Genome resources/MpTak1v5.1r1_GO_annotation.tsv", sep="", header = FALSE)
 
 #add the list to the main one
 cd_full_GO<- cd_full %>%left_join(GOlist, by=c("ensgenes"="V1"))
@@ -385,7 +381,7 @@ names(cd_full_GO)[names(cd_full_GO) == "V2"] <- "GO"
 
 CdUpMP<- cd_full_GO[cd_full_GO$padj <= 0.05 & cd_full_GO$log2FoldChange >= 1, ]
 CdUpMP<-  CdUpMP[complete.cases(CdUpMP$ensgenes),]
-CdDownMP<- cd_full_GO[cd_annot$padj <= 0.05 & cd_full_GO$log2FoldChange <= -1, ]
+CdDownMP<- cd_full_GO[cd_full_GO$padj <= 0.05 & cd_full_GO$log2FoldChange <= -1, ]
 CdDownMP<- CdDownMP[complete.cases(CdDownMP$ensgenes), ]
 
 #now we just keep the GO list
@@ -406,7 +402,7 @@ cd_frame<- cd_full_GO %>%
     select(ensgenes, GO, evidence)
 
 #reorder the columns and make sure all columns are characters
-cd_ordered_GO<- cd_frame_na[,c(2,3,1)]
+cd_ordered_GO<- cd_frame[,c(2,3,1)]
 cd_ordered_GO$GO <- as.character(cd_ordered_GO$GO)
 
 #we build the universe now from cd_table
@@ -478,7 +474,7 @@ write.csv(GOres, "~/Desktop/git MP/GOres.csv")
 ##KEGG enrichment analysis
 
 ```{r}
-annotKEGG<- read.csv("~/Desktop/git MP/Genome resources/MpTak_v6.1_func_annotation.tsv", sep= "", header=FALSE)
+annotKEGG<- read.csv("~/Documents/Trabajo/git MP/Mpolymorpha_Cd_RNAseq/Genome resources/MpTak_v6.1_func_annotation.tsv", sep= "", header=FALSE)
 
 annotKEGG<- annotKEGG %>%
   filter(V2=="KEGG") %>%
@@ -502,7 +498,7 @@ MPpaths<- kegga(kegga_input, species.KEGG = "ko")
 MPpaths<- na.omit(MPpaths)
 MPpaths_sig<- MPpaths %>%
   filter(P.DE<0.05)
-write.csv(MPpaths_sig, "~/Desktop/git MP/kegga_sig.csv")
+write.csv(MPpaths_sig, "~/Documents/Trabajo/git MP/Mpolymorpha_Cd_RNAseq/kegga_sig.csv")
 
 
 #For Pathview is neccessary to create a table with the KEGG names with raw data for each of the sample
@@ -512,10 +508,9 @@ Kegg_test<-datakegg%>%
     select(-1, -8)
 Kegg_clean<- na.omit(Kegg_test)
 Kegg_clean<- Kegg_clean[,c(7,1,2,3,4,5,6)]
-write.csv(Kegg_clean, "~/Desktop/git MP/keggtrial.csv")
+write.csv(Kegg_clean, "~/Documents/Trabajo/git MP/Mpolymorpha_Cd_RNAseq/keggtrial.csv")
 
 ```
-
 
 
 List of genes used for validation through qRT-PCR analysis
