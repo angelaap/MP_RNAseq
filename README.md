@@ -10,7 +10,7 @@ Instead I will follow the workflow described [here](https://github.com/maggimars
 Fasta files are compressed and available in the directory MP_rna of Flash (*Deigo*, Okinawa Institute of Science and Technology)
 
 Once in flash create a new directory `mkdir MP_rna`
-
+ 
 Enter in the folder `cd MP_rna`
 
 Move the folder containing the raw sequences to this folder `mv /flash/MitaraiU/Angela/rawfiles .`

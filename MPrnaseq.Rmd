@@ -520,37 +520,58 @@ list_validation<- c("Mapoly0003s0267", "Mapoly0031s0032", "Mapoly0117s0029", "Ma
 ## To make the table with DE pathways and the DE genes information included
 
 ```{r}
-dat <- fread("ko00290.csv", select = "kegg.names")
-valinekegg <- as.vector(dat$kegg.names)
-valines<- cd_full %>%
-  filter(grepl(paste(valinekegg, collapse="|"), annotation))
 
 dat <- fread("genedata.ko00290.tsv", select = "kegg.names")
 valinekegg <- as.vector(dat$kegg.names)
 valine<- cd_full %>%
   filter(grepl(paste(valinekegg, collapse="|"), annotation))
+valine$pathway<- paste("Valine, leucine and isoleucine biosynthesis")
 
 dat2 <- fread("genedata.ko00400.tsv", select = "kegg.names")
 phekegg <- as.vector(dat2$kegg.names)
 phenylalanine<- cd_full %>%
   filter(grepl(paste(phekegg, collapse="|"), annotation))
+phenylalanine$pathway<- paste("Phenylalanine, tyrosine and tryptophan biosynthesis")
 
 dat3 <- fread("ko00940.csv", select = "kegg.names")
 phenylkegg <- as.vector(dat3$kegg.names)
 phenyl<- cd_full %>%
-  filter(grepl(paste(phenylkegg, collapse="|"), annotation)) %>%
-  filter(padj <= 0.05, log2FoldChange >= 1)
+  filter(grepl(paste(phenylkegg, collapse="|"), annotation)) 
+phenyl$pathway<- paste("Phenylpropanoid biosynthesis")
 
 dat4 <- fread("ko00480.csv", select = "kegg.names")
 glukegg <- as.vector(dat4$kegg.names)
 glut<- cd_full %>%
-  filter(grepl(paste(glukegg, collapse="|"), annotation)) %>%
-  filter(padj <= 0.05, log2FoldChange >= 1)
+  filter(grepl(paste(glukegg, collapse="|"), annotation)) 
+glut$pathway<- paste("Glutathione metabolism")
 
-%>%
-  filter(padj <= 0.05, log2FoldChange >= 1)
+dat5 <- fread("ko00270.csv", select = "kegg.names")
+metkegg <- as.vector(dat5$kegg.names)
+met<- cd_full %>%
+  filter(grepl(paste(metkegg, collapse="|"), annotation)) 
+met$pathway<- paste("Cysteine and methionine metabolism")
 
-CdUpMP<- cd_full_GO[cd_full$padj <= 0.05 & cd_full$log2FoldChange >= 1, ]
+dat6 <- fread("ko00073.csv", select = "kegg.names")
+waxkegg <- as.vector(dat6$kegg.names)
+wax<- cd_full %>%
+  filter(grepl(paste(waxkegg, collapse="|"), annotation)) 
+wax$pathway<- paste("Cutin, suberine and wax biosynthesis")
+
+dat7 <- fread("ko00941.csv", select = "kegg.names")
+flavkegg <- as.vector(dat7$kegg.names)
+flav<- cd_full %>%
+  filter(grepl(paste(flavkegg, collapse="|"), annotation)) 
+flav$pathway<- paste("Flavonoid biosynthesis")
+
+dat8 <- fread("ko04146.csv", select = "kegg.names")
+peroxisomekegg <- as.vector(dat8$kegg.names)
+peroxisome<- cd_full %>%
+  filter(grepl(paste(peroxisomekegg, collapse="|"), annotation)) 
+peroxisome$pathway<- paste("Peroxisome")
+
+pathways<- rbind(valine,phenylalanine, phenyl, glut, met, wax,flav,peroxisome)
+pathways_sig<- filter(pathways, padj <= 0.05, log2FoldChange >= 1)
+
 ```
 
 
