@@ -517,4 +517,41 @@ List of genes used for validation through qRT-PCR analysis
 ```{r}
 list_validation<- c("Mapoly0003s0267", "Mapoly0031s0032", "Mapoly0117s0029", "Mapoly0137s0019", "Mapoly0008s0244", "Mapoly0002s0324", "Mapoly0009s0173", "Mapoly0097s0009", "Mapoly0070s0070", "Mapoly0076s0007", "Mapoly0073s0038", "Mapoly0180s0018", "Mapoly0036s0136", "Mapoly0015s0156", "Mapoly0097s0082")
 ```
+## To make the table with DE pathways and the DE genes information included
+
+```{r}
+dat <- fread("ko00290.csv", select = "kegg.names")
+valinekegg <- as.vector(dat$kegg.names)
+valines<- cd_full %>%
+  filter(grepl(paste(valinekegg, collapse="|"), annotation))
+
+dat <- fread("genedata.ko00290.tsv", select = "kegg.names")
+valinekegg <- as.vector(dat$kegg.names)
+valine<- cd_full %>%
+  filter(grepl(paste(valinekegg, collapse="|"), annotation))
+
+dat2 <- fread("genedata.ko00400.tsv", select = "kegg.names")
+phekegg <- as.vector(dat2$kegg.names)
+phenylalanine<- cd_full %>%
+  filter(grepl(paste(phekegg, collapse="|"), annotation))
+
+dat3 <- fread("ko00940.csv", select = "kegg.names")
+phenylkegg <- as.vector(dat3$kegg.names)
+phenyl<- cd_full %>%
+  filter(grepl(paste(phenylkegg, collapse="|"), annotation)) %>%
+  filter(padj <= 0.05, log2FoldChange >= 1)
+
+dat4 <- fread("ko00480.csv", select = "kegg.names")
+glukegg <- as.vector(dat4$kegg.names)
+glut<- cd_full %>%
+  filter(grepl(paste(glukegg, collapse="|"), annotation)) %>%
+  filter(padj <= 0.05, log2FoldChange >= 1)
+
+%>%
+  filter(padj <= 0.05, log2FoldChange >= 1)
+
+CdUpMP<- cd_full_GO[cd_full$padj <= 0.05 & cd_full$log2FoldChange >= 1, ]
+```
+
+
 
