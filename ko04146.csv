@@ -1,0 +1,75 @@
+﻿kegg.names,annot
+K13335  ,peroxin-16
+K13336  ,peroxin-3
+K13337  ,peroxin-19
+K05677  ,"ATP-binding cassette, subfamily D (ALD), member 3 [EC:7.6.2.4]"
+K13338  ,peroxin-1
+K13339  ,peroxin-6
+K13340  ,peroxin-26
+K13341  ,peroxin-7
+K13342  ,peroxin-5
+K13343  ,peroxin-14
+K13344  ,peroxin-13
+K13345  ,peroxin-12
+K13346  ,peroxin-10
+K06664  ,peroxin-2
+K13347  ,peroxisomal membrane protein 2
+K13348  ,protein Mpv17
+K13349  ,Mpv17-like protein
+K13350  ,peroxisomal membrane protein 4
+K13351  ,peroxin-11A
+K13352  ,peroxin-11B
+K13353  ,peroxin-11C
+K13354  ,"solute carrier family 25 (peroxisomal adenine nucleotide transporter), member 17"
+K12261  ,2-hydroxyacyl-CoA lyase [EC:4.1.2.63]
+K01796  ,alpha-methylacyl-CoA racemase [EC:5.1.99.4]
+K00477  ,phytanoyl-CoA hydroxylase [EC:1.14.11.18]
+K00232  ,acyl-CoA oxidase [EC:1.3.3.6]
+K10214  ,"3alpha,7alpha,12alpha-trihydroxy-5beta-cholestanoyl-CoA 24-hydroxylase [EC:1.17.99.3]"
+K12405  ,"(3R)-3-hydroxyacyl-CoA dehydrogenase / 3a,7a,12a-trihydroxy-5b-cholest-24-enoyl-CoA hydratase / enoyl-CoA hydratase 2 [EC:1.1.1.- 4.2.1.107 4.2.1.119]"
+K08764  ,sterol carrier protein 2 [EC:2.3.1.176]
+K00659  ,bile acid-CoA:amino acid N-acyltransferase [EC:2.3.1.65 3.1.2.2]
+K07514  ,"enoyl-CoA hydratase / 3-hydroxyacyl-CoA dehydrogenase / 3,2-trans-enoyl-CoA isomerase [EC:4.2.1.17 1.1.1.35 5.3.3.8]"
+K07513  ,acetyl-CoA acyltransferase 1 [EC:2.3.1.16]
+K13237  ,"2,4-dienoyl-CoA reductase [(3E)-enoyl-CoA-producing], peroxisomal [EC:1.3.1.124]"
+K12663  ,"Delta3,5-Delta2,4-dienoyl-CoA isomerase [EC:5.3.3.21]"
+K05675  ,"ATP-binding cassette, subfamily D (ALD), member 1 [EC:7.6.2.4]"
+K05676  ,"ATP-binding cassette, subfamily D (ALD), member 2 [EC:7.6.2.4]"
+K05678  ,"ATP-binding cassette, subfamily D (ALD), member 4 [EC:7.6.2.8]"
+K25819  ,"ATP-binding cassette, subfamily D (ALD), peroxisomal ABC transporter [EC:7.6.2.4]"
+K15628  ,"ATP-binding cassette, subfamily D (ALD), peroxisomal long-chain fatty acid import protein [EC:7.6.2.4]"
+K08746  ,"solute carrier family 27 (fatty acid transporter), member 2 [EC:6.2.1.- 6.2.1.3]"
+K01897  ,long-chain acyl-CoA synthetase [EC:6.2.1.3]
+K07753  ,peroxisomal trans-2-enoyl-CoA reductase [EC:1.3.1.38]
+K13239  ,Delta3-Delta2-enoyl-CoA isomerase [EC:5.3.3.8]
+K22587  ,"Delta3,5-Delta2,4-dienoyl-CoA isomerase [EC:5.3.3.21]"
+K17879  ,peroxisomal coenzyme A diphosphatase NUDT7 [EC:3.6.1.-]
+K03426  ,NAD+ diphosphatase [EC:3.6.1.22]
+K13355  ,"nucleoside diphosphate-linked moiety X motif 19, mitochondrial [EC:3.6.1.-]"
+K11992  ,acyl-CoA thioesterase 8 [EC:3.1.2.27]
+K00624  ,carnitine O-acetyltransferase [EC:2.3.1.7]
+K05940  ,carnitine O-octanoyltransferase [EC:2.3.1.137]
+K01578  ,malonyl-CoA decarboxylase [EC:4.1.1.9]
+K00649  ,glyceronephosphate O-acyltransferase [EC:2.3.1.42]
+K00803  ,alkyldihydroxyacetonephosphate synthase [EC:2.5.1.26]
+K13356  ,alcohol-forming fatty acyl-CoA reductase [EC:1.2.1.84]
+K00869  ,mevalonate kinase [EC:2.7.1.36]
+K13273  ,phosphomevalonate kinase [EC:2.7.4.2]
+K00830  ,alanine-glyoxylate transaminase / serine-glyoxylate transaminase / serine-pyruvate transaminase [EC:2.6.1.44 2.6.1.45 2.6.1.51]
+K00273  ,D-amino-acid oxidase [EC:1.4.3.3]
+K00272  ,D-aspartate oxidase [EC:1.4.3.1]
+K00031  ,isocitrate dehydrogenase [EC:1.1.1.42]
+K00308  ,N1-acetylpolyamine oxidase [EC:1.5.3.13]
+K00306  ,sarcosine oxidase / L-pipecolate oxidase [EC:1.5.3.1 1.5.3.7]
+K01640  ,hydroxymethylglutaryl-CoA lyase [EC:4.1.3.4]
+K11517  ,(S)-2-hydroxy-acid oxidase [EC:1.1.3.15]
+K03781  ,catalase [EC:1.11.1.6]
+K11187  ,peroxiredoxin 5 [EC:1.11.1.24]
+K04565  ,"superoxide dismutase, Cu-Zn family [EC:1.15.1.1]"
+K04564  ,"superoxide dismutase, Fe-Mn family [EC:1.15.1.1]"
+K13241  ,"nitric-oxide synthase, inducible [EC:1.14.13.39]"
+K13279  ,peroxiredoxin 1 [EC:1.11.1.24]
+K08726  ,soluble epoxide hydrolase / lipid-phosphate phosphatase [EC:3.3.2.10 3.1.3.76]
+K13299  ,glutathione S-transferase kappa 1 [EC:2.5.1.18]
+K00106  ,xanthine dehydrogenase/oxidase [EC:1.17.1.4 1.17.3.2]
+K11147  ,dehydrogenase/reductase SDR family member 4 [EC:1.1.-.-]

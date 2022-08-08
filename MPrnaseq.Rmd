@@ -72,7 +72,7 @@ library(GSEABase)
 
 Load data, the reads for the different samples are in individual .txt files
 ```{r}
-files <- list.files(path="~/Documents/Trabajo/git MP/DESeq analysis/raw counts/", pattern="*.txt", full.names=TRUE, recursive=FALSE)
+files <- list.files(path="~/Documents/GitHub/MP_RNAseq/raw counts/", pattern="*.txt", full.names=TRUE, recursive=FALSE)
 datalist <- lapply(files, function(x)read.table(x, header=T))
 datafr <- do.call("cbind", datalist) 
 #delete the extracolumns
@@ -138,7 +138,7 @@ Check out results:
 cd_res<- results(dds_df, contrast = c("treatment", "Cd", "C"), alpha = 0.05)
 head(cd_res)
 
-write.csv(cd_res, "~/Documents/Trabajo/git MP/Mpolymorpha_Cd_RNAseq/cd_res.csv", row.names = FALSE)
+write.csv(cd_res, "~/Documents/GitHub/MP_RNAseq/cd_res.csv", row.names = FALSE)
 ```
 
 
@@ -200,7 +200,7 @@ PCA<-ggplot(data1, aes(PC1, PC2, color = treatment))+ theme_bw()+
   #theme(text = element_text(size=20)) + ggtitle("rlog PCA")
 PCA
 #ggsave("desktop/PCA.pdf", device="pdf", width = 9, height = 5) 
-ggsave("~/Documents/Trabajo/git MP/Mpolymorpha_Cd_RNAseq/rlogPCA.pdf", device="pdf", width = 7, height = 5) # to save the plot
+ggsave("~/Documents/GitHub/MP_RNAseq/rlogPCA.pdf", device="pdf", width = 7, height = 5) # to save the plot
 ```
 
 variance stabilized PCA:
@@ -340,7 +340,7 @@ cdplot<-ggplot(cd_table, aes(x = log2FoldChange, y = -log10(padj), color = diffe
 
 cdplot1 <- cdplot + scale_colour_manual(values = c ("#42858C", "#666666"))
 cdplot1
-ggsave("~/Documents/Trabajo/git MP/Mpolymorpha_Cd_RNAseq/vulcano.pdf", device="pdf", width = 8, height = 5)
+ggsave("~/Documents/GitHub/MP_RNAseq/vulcano.pdf", device="pdf", width = 8, height = 5)
 
 ```
 
@@ -354,12 +354,12 @@ cd_tableMP<- data.frame(cd_res) %>%
 ```
 
 ```{r}
-conversion<- read.table("~/Documents/Trabajo/git MP/Genome resources/gene_correspondence_table_v51.txt", fill = TRUE, row.names=NULL, col.names = c("V1", "old_ID"))
+conversion<- read.table("~/Documents/Projects OIST/Other/Riken/paper mp/git MP/Genome resources/gene_correspondence_table_v51.txt", fill = TRUE, row.names=NULL, col.names = c("V1", "old_ID"))
 cd_table_conv<-cd_tableMP %>%
     left_join(conversion, by=c("ensgenes"="V1"))
 
 #add the annotation
-annot<- read.csv("~/Documents/Trabajo/git MP/Genome resources/MpTak_v6.1_func_annot_1line_excel.csv", sep= ";", header=FALSE)
+annot<- read.csv("~/Documents/Projects OIST/Other/Riken/paper mp/git MP/Genome resources/MpTak_v6.1_func_annot_1line_excel.csv", sep= ";", header=FALSE)
 
 #add annotation table to the main one
 cd_full<- cd_tableMP %>%left_join(annot, by=c("ensgenes"="V1"))
@@ -370,7 +370,7 @@ names(cd_full)[names(cd_full) == "V2"] <- "annotation"
 ##GOstats
 Add GO terms
 ```{r}
-GOlist<- read.csv("~/Documents/Trabajo/git MP/Genome resources/MpTak1v5.1r1_GO_annotation.tsv", sep="", header = FALSE)
+GOlist<- read.csv("~/Documents/Projects OIST/Other/Riken/paper mp/git MP/Genome resources/MpTak1v5.1r1_GO_annotation.tsv", sep="", header = FALSE)
 
 #add the list to the main one
 cd_full_GO<- cd_full %>%left_join(GOlist, by=c("ensgenes"="V1"))
@@ -474,7 +474,7 @@ write.csv(GOres, "~/Desktop/git MP/GOres.csv")
 ##KEGG enrichment analysis
 
 ```{r}
-annotKEGG<- read.csv("~/Documents/Trabajo/git MP/Mpolymorpha_Cd_RNAseq/Genome resources/MpTak_v6.1_func_annotation.tsv", sep= "", header=FALSE)
+annotKEGG<- read.csv("~/Documents/Projects OIST/Other/Riken/paper mp/git MP/Genome resources/MpTak_v6.1_func_annotation.tsv", sep= "", header=FALSE)
 
 annotKEGG<- annotKEGG %>%
   filter(V2=="KEGG") %>%
@@ -521,50 +521,56 @@ list_validation<- c("Mapoly0003s0267", "Mapoly0031s0032", "Mapoly0117s0029", "Ma
 
 ```{r}
 
-dat <- fread("genedata.ko00290.tsv", select = "kegg.names")
+dat <- fread("~/Documents/GitHub/MP_RNAseq/Pathview results/genedata.ko00290.tsv", select = "kegg.names")
 valinekegg <- as.vector(dat$kegg.names)
 valine<- cd_full %>%
   filter(grepl(paste(valinekegg, collapse="|"), annotation))
 valine$pathway<- paste("Valine, leucine and isoleucine biosynthesis")
 
-dat2 <- fread("genedata.ko00400.tsv", select = "kegg.names")
+dat2 <- fread("~/Documents/GitHub/MP_RNAseq/Pathview results/genedata.ko00400.tsv", select = "kegg.names")
 phekegg <- as.vector(dat2$kegg.names)
 phenylalanine<- cd_full %>%
   filter(grepl(paste(phekegg, collapse="|"), annotation))
 phenylalanine$pathway<- paste("Phenylalanine, tyrosine and tryptophan biosynthesis")
 
-dat3 <- fread("ko00940.csv", select = "kegg.names")
-phenylkegg <- as.vector(dat3$kegg.names)
+datos <- read.csv("~/Documents/GitHub/MP_RNAseq/ko00940.csv")
+phenylkegg <- as.vector(datos$kegg.names)
+phenylkegg<- gsub(" ", "", phenylkegg)
 phenyl<- cd_full %>%
   filter(grepl(paste(phenylkegg, collapse="|"), annotation)) 
 phenyl$pathway<- paste("Phenylpropanoid biosynthesis")
 
-dat4 <- fread("ko00480.csv", select = "kegg.names")
+dat4 <- read.csv("~/Documents/GitHub/MP_RNAseq/ko00480.csv")
 glukegg <- as.vector(dat4$kegg.names)
+glukegg<- gsub(" ", "", glukegg)
 glut<- cd_full %>%
   filter(grepl(paste(glukegg, collapse="|"), annotation)) 
 glut$pathway<- paste("Glutathione metabolism")
 
-dat5 <- fread("ko00270.csv", select = "kegg.names")
+dat5 <- read.csv("~/Documents/GitHub/MP_RNAseq/ko00270.csv")
 metkegg <- as.vector(dat5$kegg.names)
+metkegg<- gsub(" ", "", metkegg)
 met<- cd_full %>%
   filter(grepl(paste(metkegg, collapse="|"), annotation)) 
 met$pathway<- paste("Cysteine and methionine metabolism")
 
-dat6 <- fread("ko00073.csv", select = "kegg.names")
+dat6 <- read.csv("~/Documents/GitHub/MP_RNAseq/ko00073.csv")
 waxkegg <- as.vector(dat6$kegg.names)
+waxkegg <- gsub(" ", "", waxkegg)
 wax<- cd_full %>%
   filter(grepl(paste(waxkegg, collapse="|"), annotation)) 
 wax$pathway<- paste("Cutin, suberine and wax biosynthesis")
 
-dat7 <- fread("ko00941.csv", select = "kegg.names")
+dat7 <- read.csv("~/Documents/GitHub/MP_RNAseq/ko00941.csv")
 flavkegg <- as.vector(dat7$kegg.names)
+flavkegg <- gsub(" ", "", flavkegg)
 flav<- cd_full %>%
   filter(grepl(paste(flavkegg, collapse="|"), annotation)) 
 flav$pathway<- paste("Flavonoid biosynthesis")
 
-dat8 <- fread("ko04146.csv", select = "kegg.names")
+dat8 <- read.csv("~/Documents/GitHub/MP_RNAseq/ko04146.csv")
 peroxisomekegg <- as.vector(dat8$kegg.names)
+peroxisomekegg <- gsub(" ", "", peroxisomekegg)
 peroxisome<- cd_full %>%
   filter(grepl(paste(peroxisomekegg, collapse="|"), annotation)) 
 peroxisome$pathway<- paste("Peroxisome")
