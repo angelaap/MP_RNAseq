@@ -533,8 +533,8 @@ phenylalanine<- cd_full %>%
   filter(grepl(paste(phekegg, collapse="|"), annotation))
 phenylalanine$pathway<- paste("Phenylalanine, tyrosine and tryptophan biosynthesis")
 
-datos <- read.csv("~/Documents/GitHub/MP_RNAseq/ko00940.csv")
-phenylkegg <- as.vector(datos$kegg.names)
+dat3 <- read.csv("~/Documents/GitHub/MP_RNAseq/ko00940.csv")
+phenylkegg <- as.vector(dat3$kegg.names)
 phenylkegg<- gsub(" ", "", phenylkegg)
 phenyl<- cd_full %>%
   filter(grepl(paste(phenylkegg, collapse="|"), annotation)) 
@@ -580,5 +580,20 @@ pathways_sig<- filter(pathways, padj <= 0.05, log2FoldChange >= 1)
 
 ```
 
+The table shows very interesting results but it might be too long to present in the main manuscript. Instead let's focus on the 3 aa biosynthesis pathways-related genes
+
+```{r, table aa DEGs}
+aapathways<- rbind(valine,phenylalanine, met)
+aa_sig<- filter(aapathways, padj <= 0.05, log2FoldChange >= 1)
+write.csv(aa_sig, "~/Documents/GitHub/MP_RNAseq/aatable.csv")
+```
+
+Another table showing the antioxrelated Upregulated genes
+
+```{r, antiox}
+antiox<- rbind(glut, flav)
+antiox<- filter(antiox, padj <= 0.05, log2FoldChange >= 1)
+write.csv(antiox, "~/Documents/GitHub/MP_RNAseq/antioxtable.csv")
+```
 
 
