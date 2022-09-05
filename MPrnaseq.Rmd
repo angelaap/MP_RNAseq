@@ -431,7 +431,7 @@ gsc <- GeneSetCollection(goAllFrame, setType = GOCollection())
 Now let's run the GOstats function
 
 ```{r}
-params<- GSEAGOHyperGParams(name="MPCd", geneSetCollection= gsc, geneIds = CdDownnamesMP, universeGeneIds = universe, ontology = "BP", pvalueCutoff = 0.05, conditional = TRUE, testDirection = "over")
+params<- GSEAGOHyperGParams(name="MPCd", geneSetCollection= gsc, geneIds = CdDownnamesMP, universeGeneIds = universe, ontology = "CC", pvalueCutoff = 0.05, conditional = TRUE, testDirection = "over")
 
 #modify the function for each dataset (i.e. CdUp, CdDown)
 
@@ -439,7 +439,7 @@ Over<- hyperGTest(params)
 
 Over
 
-CdDownBP<-summary(Over)
+CdUpCC<-summary(Over)
 
 
 #Add a column with the element info and ontoly type (BP or MF)
